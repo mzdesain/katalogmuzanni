@@ -30,6 +30,10 @@
             opacity: 0;
             visibility: hidden;
             border-left: 4px solid #ee4d2d;
+            cursor: pointer; /* Menandakan bisa diklik */
+        }
+        #orderNotification:hover {
+            background-color: #fffaf9;
         }
         #orderNotification.show {
             transform: translateY(0);
@@ -160,20 +164,23 @@
     </section>
 
     <!-- Order Notification Pop-up -->
-    <div id="orderNotification" class="fixed bottom-8 left-4 z-[100] bg-white shadow-xl rounded-sm p-3 flex items-center gap-4 border border-gray-100 max-w-sm">
-        <div class="w-12 h-12 rounded-sm bg-gray-50 flex-shrink-0 overflow-hidden">
+    <div id="orderNotification" onclick="handleNotifClick()" class="fixed bottom-8 left-4 z-[100] bg-white shadow-xl rounded-sm p-3 flex items-center gap-4 border border-gray-100 max-w-sm hover:shadow-2xl transition-shadow">
+        <div class="w-12 h-12 rounded-sm bg-gray-50 flex-shrink-0 overflow-hidden border border-gray-100">
             <img id="notifImg" src="" alt="" class="w-full h-full object-cover">
         </div>
         <div>
-            <p id="notifStatus" class="text-[10px] font-bold text-orange-500 uppercase tracking-tight">Sedang Dicari</p>
+            <p id="notifStatus" class="text-[10px] font-bold text-orange-500 uppercase tracking-tight">Sedang Viral</p>
             <p class="text-xs font-medium text-gray-900 line-clamp-1" id="notifProduct">Nama Produk</p>
+            <p class="text-[9px] text-gray-400 mt-0.5">Klik untuk lihat detail</p>
         </div>
     </div>
 
-    <!-- Admin Center Floating Button -->
+    <!-- Admin Center Floating Button (Headset Icon) -->
     <button onclick="toggleAdminModal()" class="fixed bottom-8 right-4 z-[60] bg-black text-white p-4 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18 10a6 6 0 00-12 0v1a3 3 0 00-3 3v4a3 3 0 003 3h12a3 3 0 003-3v-4a3 3 0 00-3-3v-1z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18 11.5a.5.5 0 01.5.5v2a.5.5 0 01-1 0v-2a.5.5 0 01.5-.5zM5.5 11.5a.5.5 0 00-.5.5v2a.5.5 0 001 0v-2a.5.5 0 00-.5-.5z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 15v1a2 2 0 01-2 2h-1M4 15v1a2 2 0 002 2h1" />
         </svg>
     </button>
 
@@ -181,7 +188,7 @@
     <div id="adminModal" class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
         <div class="bg-white w-full max-w-md rounded-lg shadow-2xl overflow-hidden">
             <div class="bg-shopee p-4 text-white flex justify-between items-center">
-                <h3 class="font-bold">Admin Center</h3>
+                <h3 class="font-bold">Pusat Bantuan Admin</h3>
                 <button onclick="toggleAdminModal()">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -189,11 +196,11 @@
                 </button>
             </div>
             <div class="p-6">
-                <p class="text-sm text-gray-600 mb-4">Ada pertanyaan tentang produk? Tulis pesanmu di bawah ini:</p>
-                <textarea id="adminMessage" rows="4" class="w-full border border-gray-200 rounded-md p-3 text-sm focus:ring-1 focus:ring-[#ee4d2d] focus:outline-none placeholder-gray-400" placeholder="Contoh: Halo admin, saya mau tanya produk iPhone 11..."></textarea>
+                <p class="text-sm text-gray-600 mb-4">Punya pertanyaan mengenai produk rekomendasi? Silakan tulis pesan di bawah:</p>
+                <textarea id="adminMessage" rows="4" class="w-full border border-gray-200 rounded-md p-3 text-sm focus:ring-1 focus:ring-[#ee4d2d] focus:outline-none placeholder-gray-400" placeholder="Tulis pesan Anda di sini..."></textarea>
                 <button onclick="sendAdminWA()" class="w-full mt-4 bg-shopee text-white py-3 rounded-md font-bold hover:bg-[#d73211] transition-colors flex items-center justify-center gap-2">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                    Kirim ke WhatsApp
+                    Kirim ke WhatsApp Admin
                 </button>
             </div>
         </div>
@@ -231,6 +238,7 @@
         let searchQuery = '';
         let currentPage = 1;
         const itemsPerPage = 20;
+        let currentViralProductLink = "#"; // Untuk menyimpan link produk viral yang sedang tampil
 
         const productGrid = document.getElementById('productGrid');
         const emptyState = document.getElementById('emptyState');
@@ -304,6 +312,7 @@
             notifImg.src = product.image;
             notifStatus.innerText = `Mengarahkan ke ${platform}...`;
             notifStatus.className = "text-[10px] font-bold text-green-600";
+            currentViralProductLink = platform === 'Shopee' ? product.shopeeLink : platform === 'TikTok' ? product.tiktokLink : product.tokopediaLink;
             orderNotif.classList.add('show');
             setTimeout(() => orderNotif.classList.remove('show'), 3000);
         }
@@ -311,15 +320,25 @@
         // --- Fitur Notifikasi Produk Viral (Auto-Pop-up) ---
         function triggerViralNotif() {
             const randomProd = products[Math.floor(Math.random() * products.length)];
-            const statusTexts = ["Sedang Viral", "Paling Dicari", "Banyak Dilihat", "Trend Minggu Ini"];
+            const statusTexts = ["Sedang Viral 🔥", "Paling Banyak Dicari ✨", "BANYAK DILIHAT", "Produk Terpopuler ⭐"];
             
             notifProduct.innerText = randomProd.title;
             notifImg.src = randomProd.image;
             notifStatus.innerText = statusTexts[Math.floor(Math.random() * statusTexts.length)];
             notifStatus.className = "text-[10px] font-bold text-orange-500 uppercase tracking-tight";
             
+            // Simpan link Shopee sebagai default tujuan klik notifikasi
+            currentViralProductLink = randomProd.shopeeLink;
+            
             orderNotif.classList.add('show');
             setTimeout(() => orderNotif.classList.remove('show'), 5000);
+        }
+
+        // Fungsi klik pada notifikasi
+        function handleNotifClick() {
+            if (currentViralProductLink && currentViralProductLink !== "#") {
+                window.open(currentViralProductLink, '_blank');
+            }
         }
 
         // --- Fitur Admin Center & Chat ---
@@ -333,6 +352,7 @@
             const waUrl = `https://wa.me/6285251675143?text=${encodeURIComponent(msg)}`;
             window.open(waUrl, '_blank');
             toggleAdminModal();
+            document.getElementById('adminMessage').value = ""; // Reset form
         }
 
         function filterCategory(cat) {
@@ -350,9 +370,9 @@
 
         window.onload = () => {
             renderProducts();
-            // Start periodic viral notifications every 15-20 seconds
+            // Jalankan notifikasi viral setiap 20 detik
             setInterval(() => {
-                const delay = Math.floor(Math.random() * 5000) + 15000;
+                const delay = Math.floor(Math.random() * 5000) + 10000;
                 setTimeout(triggerViralNotif, delay);
             }, 20000);
         };
