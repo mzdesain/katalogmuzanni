@@ -113,6 +113,11 @@
             <!-- Products injected by JS -->
         </div>
 
+        <!-- Paginasi -->
+        <div id="paginationContainer" class="mt-12 flex justify-center items-center gap-2">
+            <!-- Tombol Paginasi akan dimasukkan melalui JS -->
+        </div>
+
         <div id="emptyState" class="hidden text-center py-20">
             <p class="text-gray-400 italic">Tidak ada produk yang ditemukan.</p>
         </div>
@@ -194,7 +199,7 @@
     </footer>
 
     <script>
-        const products = [
+         const products = [
             {
                 id: 1,
                 title: "TWS Wireless Bluetooth Earphone Pro4 Headphones ear buds In-ear Earbuds Hands-free Headset",
@@ -259,10 +264,13 @@
 
         let currentCategory = 'All';
         let searchQuery = '';
+        let currentPage = 1;
+        const itemsPerPage = 20;
 
         const productGrid = document.getElementById('productGrid');
         const emptyState = document.getElementById('emptyState');
         const searchInput = document.getElementById('searchInput');
+        const paginationContainer = document.getElementById('paginationContainer');
 
         const orderNotif = document.getElementById('orderNotification');
         const notifStatus = document.getElementById('notifStatus');
@@ -278,12 +286,22 @@
 
             if (filtered.length === 0) {
                 productGrid.innerHTML = '';
+                paginationContainer.innerHTML = '';
                 emptyState.classList.remove('hidden');
                 return;
             }
 
             emptyState.classList.add('hidden');
-            productGrid.innerHTML = filtered.map(p => `
+
+            // Kalkulasi Paginasi
+            const totalPages = Math.ceil(filtered.length / itemsPerPage);
+            if (currentPage > totalPages) currentPage = totalPages || 1;
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedItems = filtered.slice(startIndex, endIndex);
+
+            productGrid.innerHTML = paginatedItems.map(p => `
                 <div class="product-card rounded-sm overflow-hidden flex flex-col h-full border border-gray-100">
                     <div class="aspect-square overflow-hidden bg-gray-50">
                         <img 
@@ -302,10 +320,10 @@
                                 Shopee
                             </a>
                             <div class="grid grid-cols-2 gap-1.5">
-                                <a href="${p.tiktokLink}" target="_blank" onclick="handleAction(event, ${p.id}, 'TikTok')" class="text-center py-1.5 border border-gray-100 text-gray-700 rounded-sm text-[10px] font-medium hover:bg-gray-50 transition-colors">
+                                <a href="${p.tiktokLink}" target="_blank" onclick="handleAction(event, ${p.id}, 'TikTok')" class="text-center py-1.5 border border-gray-200 text-gray-700 rounded-sm text-[10px] font-medium hover:bg-gray-50 transition-colors">
                                     TikTok
                                 </a>
-                                <a href="${p.tokopediaLink || '#'}" target="_blank" onclick="handleAction(event, ${p.id}, 'Tokopedia')" class="text-center py-1.5 border border-gray-100 text-gray-700 rounded-sm text-[10px] font-medium hover:bg-gray-50 transition-colors">
+                                <a href="${p.tokopediaLink || '#'}" target="_blank" onclick="handleAction(event, ${p.id}, 'Tokopedia')" class="text-center py-1.5 border border-gray-200 text-gray-700 rounded-sm text-[10px] font-medium hover:bg-gray-50 transition-colors">
                                     Tokped
                                 </a>
                             </div>
@@ -313,29 +331,66 @@
                     </div>
                 </div>
             `).join('');
+
+            renderPagination(totalPages);
+        }
+
+        function renderPagination(totalPages) {
+            if (totalPages <= 1) {
+                paginationContainer.innerHTML = '';
+                return;
+            }
+
+            let buttons = '';
+            
+            // Tombol Prev
+            buttons += `
+                <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} class="px-3 py-1 border rounded-sm text-sm ${currentPage === 1 ? 'text-gray-300' : 'text-gray-600 hover:bg-gray-50'}">
+                    Prev
+                </button>
+            `;
+
+            // Nomor Halaman
+            for (let i = 1; i <= totalPages; i++) {
+                buttons += `
+                    <button onclick="changePage(${i})" class="px-3 py-1 border rounded-sm text-sm ${currentPage === i ? 'bg-[#ee4d2d] text-white border-[#ee4d2d]' : 'text-gray-600 hover:bg-gray-50'}">
+                        ${i}
+                    </button>
+                `;
+            }
+
+            // Tombol Next
+            buttons += `
+                <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} class="px-3 py-1 border rounded-sm text-sm ${currentPage === totalPages ? 'text-gray-300' : 'text-gray-600 hover:bg-gray-50'}">
+                    Next
+                </button>
+            `;
+
+            paginationContainer.innerHTML = buttons;
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            renderProducts();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function handleAction(event, productId, platform) {
             const product = products.find(p => p.id === productId);
             if (!product) return;
 
-            // Memperbarui konten notifikasi dengan teks konfirmasi aksi
             notifProduct.innerText = product.title;
             notifImg.src = product.image;
             notifStatus.innerText = `Menuju toko ${platform}...`;
             notifStatus.className = "text-[10px] font-bold text-green-600";
 
-            // Menampilkan pop-up tepat saat klik terjadi
             orderNotif.classList.add('show');
-            
-            // Menghilangkan pop-up setelah 3 detik
-            setTimeout(() => {
-                orderNotif.classList.remove('show');
-            }, 3000);
+            setTimeout(() => orderNotif.classList.remove('show'), 3000);
         }
 
         function filterCategory(cat) {
             currentCategory = cat;
+            currentPage = 1; // Reset ke halaman 1 setiap kali ganti kategori
             const buttons = document.querySelectorAll('.category-btn');
             buttons.forEach(btn => {
                 const btnText = btn.innerText === 'Semua' ? 'All' : 
@@ -357,6 +412,7 @@
 
         searchInput.addEventListener('input', (e) => {
             searchQuery = e.target.value;
+            currentPage = 1; // Reset ke halaman 1 saat mencari
             renderProducts();
         });
 
