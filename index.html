@@ -30,7 +30,7 @@
             opacity: 0;
             visibility: hidden;
             border-left: 4px solid #ee4d2d;
-            cursor: pointer; /* Menandakan bisa diklik */
+            cursor: pointer;
         }
         #orderNotification:hover {
             background-color: #fffaf9;
@@ -111,10 +111,16 @@
 
     <!-- Product Grid -->
     <main class="max-w-6xl mx-auto px-4 py-12">
-        <h3 class="text-lg font-bold mb-6 flex items-center gap-2">
-            <span class="w-1 h-6 bg-shopee"></span>
-            Rekomendasi Hari Ini
-        </h3>
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-2">
+            <div>
+                <h3 class="text-lg font-bold flex items-center gap-2">
+                    <span class="w-1 h-6 bg-shopee"></span>
+                    Rekomendasi Hari Ini
+                </h3>
+                <p class="text-xs text-gray-500 mt-1">Info: Tombol berwarna adalah link produk aktif yang dapat Anda klik.</p>
+            </div>
+        </div>
+        
         <div id="productGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
             <!-- Products injected by JS -->
         </div>
@@ -238,7 +244,7 @@
         let searchQuery = '';
         let currentPage = 1;
         const itemsPerPage = 20;
-        let currentViralProductLink = "#"; // Untuk menyimpan link produk viral yang sedang tampil
+        let currentViralProductLink = "#"; 
 
         const productGrid = document.getElementById('productGrid');
         const emptyState = document.getElementById('emptyState');
@@ -271,7 +277,13 @@
             const endIndex = startIndex + itemsPerPage;
             const paginatedItems = filtered.slice(startIndex, endIndex);
 
-            productGrid.innerHTML = paginatedItems.map(p => `
+            productGrid.innerHTML = paginatedItems.map(p => {
+                // Logika Penentuan Gaya Tombol Berdasarkan Link
+                const shopeeStyle = (p.shopeeLink && p.shopeeLink !== "#") ? "bg-[#ee4d2d] text-white hover:bg-[#d73211]" : "bg-gray-100 text-gray-400 cursor-not-allowed pointer-events-none";
+                const tiktokStyle = (p.tiktokLink && p.tiktokLink !== "#") ? "bg-black text-white hover:bg-gray-800" : "bg-gray-100 text-gray-400 cursor-not-allowed pointer-events-none";
+                const tokpedStyle = (p.tokopediaLink && p.tokopediaLink !== "#") ? "bg-[#03ac0e] text-white hover:bg-[#028a0b]" : "bg-gray-100 text-gray-400 cursor-not-allowed pointer-events-none";
+
+                return `
                 <div class="product-card rounded-sm overflow-hidden flex flex-col h-full border border-gray-100 shadow-sm">
                     <div class="aspect-square overflow-hidden bg-gray-50">
                         <img src="${p.image}" alt="${p.title}" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105" onerror="this.src='https://via.placeholder.com/400?text=No+Image'">
@@ -280,15 +292,15 @@
                         <h3 class="text-xs font-medium text-gray-800 line-clamp-2 mb-2 leading-snug">${p.title}</h3>
                         <p class="text-sm font-bold shopee-orange mb-4">${p.price}</p>
                         <div class="mt-auto flex flex-col gap-1.5">
-                            <a href="${p.shopeeLink}" target="_blank" onclick="handleAction(event, ${p.id}, 'Shopee')" class="text-center py-2 bg-[#ee4d2d] text-white rounded-sm text-[11px] font-bold hover:bg-[#d73211] transition-colors">Shopee</a>
+                            <a href="${p.shopeeLink}" target="_blank" onclick="handleAction(event, ${p.id}, 'Shopee')" class="text-center py-2 rounded-sm text-[11px] font-bold transition-colors ${shopeeStyle}">Shopee</a>
                             <div class="grid grid-cols-2 gap-1.5">
-                                <a href="${p.tiktokLink}" target="_blank" onclick="handleAction(event, ${p.id}, 'TikTok')" class="text-center py-1.5 border border-gray-200 text-gray-700 rounded-sm text-[10px] font-medium hover:bg-gray-50 transition-colors">TikTok</a>
-                                <a href="${p.tokopediaLink}" target="_blank" onclick="handleAction(event, ${p.id}, 'Tokopedia')" class="text-center py-1.5 border border-gray-200 text-gray-700 rounded-sm text-[10px] font-medium hover:bg-gray-50 transition-colors">Tokopedia</a>
+                                <a href="${p.tiktokLink}" target="_blank" onclick="handleAction(event, ${p.id}, 'TikTok')" class="text-center py-1.5 rounded-sm text-[10px] font-medium transition-colors ${tiktokStyle}">TikTok</a>
+                                <a href="${p.tokopediaLink}" target="_blank" onclick="handleAction(event, ${p.id}, 'Tokopedia')" class="text-center py-1.5 rounded-sm text-[10px] font-medium transition-colors ${tokpedStyle}">Tokopedia</a>
                             </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
 
             renderPagination(totalPages);
         }
@@ -310,41 +322,38 @@
             if (!product) return;
             notifProduct.innerText = product.title;
             notifImg.src = product.image;
-            notifStatus.innerText = `Mengarahkan ke ${platform}...`;
+            notifStatus.innerText = `Menuju toko ${platform}...`;
             notifStatus.className = "text-[10px] font-bold text-green-600";
             currentViralProductLink = platform === 'Shopee' ? product.shopeeLink : platform === 'TikTok' ? product.tiktokLink : product.tokopediaLink;
             orderNotif.classList.add('show');
             setTimeout(() => orderNotif.classList.remove('show'), 3000);
         }
 
-        // --- Fitur Notifikasi Produk Viral (Auto-Pop-up) ---
         function triggerViralNotif() {
             const randomProd = products[Math.floor(Math.random() * products.length)];
-            const statusTexts = ["Sedang Viral 🔥", "Paling Banyak Dicari ✨", "BANYAK DILIHAT", "Produk Terpopuler ⭐"];
+            const statusTexts = ["Sedang Viral 🔥", "Paling Banyak Dicari ✨", "BANYAK DILIHAT 👁️", "Trend Minggu Ini 🚀"];
             
             notifProduct.innerText = randomProd.title;
             notifImg.src = randomProd.image;
             notifStatus.innerText = statusTexts[Math.floor(Math.random() * statusTexts.length)];
             notifStatus.className = "text-[10px] font-bold text-orange-500 uppercase tracking-tight";
             
-            // Simpan link Shopee sebagai default tujuan klik notifikasi
-            currentViralProductLink = randomProd.shopeeLink;
+            // Prioritas link: Shopee > TikTok > Tokped
+            currentViralProductLink = (randomProd.shopeeLink !== "#") ? randomProd.shopeeLink : 
+                                     (randomProd.tiktokLink !== "#") ? randomProd.tiktokLink : 
+                                     randomProd.tokopediaLink;
             
             orderNotif.classList.add('show');
             setTimeout(() => orderNotif.classList.remove('show'), 5000);
         }
 
-        // Fungsi klik pada notifikasi
         function handleNotifClick() {
             if (currentViralProductLink && currentViralProductLink !== "#") {
                 window.open(currentViralProductLink, '_blank');
             }
         }
 
-        // --- Fitur Admin Center & Chat ---
-        function toggleAdminModal() {
-            adminModal.classList.toggle('active');
-        }
+        function toggleAdminModal() { adminModal.classList.toggle('active'); }
 
         function sendAdminWA() {
             const msg = document.getElementById('adminMessage').value;
@@ -352,7 +361,7 @@
             const waUrl = `https://wa.me/6285251675143?text=${encodeURIComponent(msg)}`;
             window.open(waUrl, '_blank');
             toggleAdminModal();
-            document.getElementById('adminMessage').value = ""; // Reset form
+            document.getElementById('adminMessage').value = "";
         }
 
         function filterCategory(cat) {
@@ -370,7 +379,6 @@
 
         window.onload = () => {
             renderProducts();
-            // Jalankan notifikasi viral setiap 20 detik
             setInterval(() => {
                 const delay = Math.floor(Math.random() * 5000) + 10000;
                 setTimeout(triggerViralNotif, delay);
